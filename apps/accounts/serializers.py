@@ -9,6 +9,5 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone', 'role']
 
     def create(self, validated_data):
-        # Parolni hash qilib saqlash
         user = User.objects.create_user(**validated_data)
         return user

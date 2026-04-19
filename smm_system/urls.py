@@ -28,11 +28,9 @@ urlpatterns = [
     path('api/v1/accounts/', include('apps.accounts.urls')),
     path('api/v1/planner/', include('apps.planner.urls')),
     path('api/v1/tasks/', include('apps.tasks.urls')),
-    # Swagger yo'llari:
+    path('api/v1/payments/', include('apps.payments.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    # Mana shu asosiy ko'rinish:
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    # Muqobil ko'rinish (Redoc):
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 

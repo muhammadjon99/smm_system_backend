@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'apps.accounts.apps.AccountsConfig',
     'apps.planner.apps.PlannerConfig',
     'apps.tasks.apps.TasksConfig',
+    'apps.payments.apps.PaymentsConfig',
 ]
 
 REST_FRAMEWORK = {
