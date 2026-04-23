@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from decimal import Decimal
-
+from .services import check_order_limits
 
 class Order(models.Model):
     class Status(models.TextChoices):
@@ -30,10 +30,13 @@ class Order(models.Model):
             })
         if self.quantity < 1:
             raise ValidationError({'quantity': "Miqdor kamida 1 bo'lishi kerak."})
+        if not self.pk:
+            check_order_limits(self.client, self.service)
 
     def save(self, *args, **kwargs):
         self.full_clean()
         self.total_price = Decimal(self.service.price) * Decimal(self.quantity)
         super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Order #{self.id} - {self.client.name}"

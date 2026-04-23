@@ -2,15 +2,26 @@ from django.db import models
 from django.conf import settings
 
 class Task(models.Model):
-    PRIORITY_CHOICES = [('low', 'Past'), ('medium', 'Oʻrta'), ('high', 'Yuqori')]
-    STATUS_CHOICES = [('todo', 'Bajarilishi kerak'), ('doing', 'Jarayonda'), ('done', 'Bajarildi')]
-
+    class Priority(models.TextChoices):
+        LOW = 'low', 'Past'
+        MEDIUM = 'medium', 'O\'rta'
+        HIGH = 'high', 'Yuqori'
+    class Status(models.TextChoices):
+        TODO = 'todo', 'Bajarilishi kerak'
+        IN_PROGRESS = 'in_progress', 'Jarayonda'
+        DONE = 'done', 'Bajarildi'
+    order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='tasks')
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='assigned_tasks'
+    )
     title = models.CharField(max_length=255)
     description = models.TextField()
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
-    deadline = models.DateTimeField(null=True, blank=True)
+    priority = models.CharField(max_length=10, choices=Priority.choices, default=Priority.MEDIUM)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.TODO)
+    deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

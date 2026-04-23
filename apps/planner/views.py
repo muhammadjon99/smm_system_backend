@@ -1,12 +1,12 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import ContentPlan
-from .serializers import ContentPlanSerializer
+from .serializers import ClientDashboardSerializer
 
 
 class ContentPlanViewSet(viewsets.ModelViewSet):
     queryset = ContentPlan.objects.all().order_by('post_date')
-    serializer_class = ContentPlanSerializer
+    serializer_class = ClientDashboardSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['client', 'post_date', 'status']
 
