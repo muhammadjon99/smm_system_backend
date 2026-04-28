@@ -1,5 +1,6 @@
 from django.db import models
 from apps.clients.models import Client
+from simple_history.models import HistoricalRecords
 
 class ContentPlan(models.Model):
     STATUS_CHOICES = [
@@ -9,7 +10,7 @@ class ContentPlan(models.Model):
         ('rejected', 'Inkor qilindi'),
         ('published', 'Post qilindi'),
     ]
-
+    history = HistoricalRecords()
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='plans')
     title = models.CharField(max_length=255)
     description = models.TextField(help_text="Post ssenariysi yoki matni")

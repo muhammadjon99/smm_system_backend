@@ -4,40 +4,56 @@ from rest_framework.response import Response
 from apps.tasks.models import Task
 from .models import Client
 from .serializers import ClientSerializer
-from rest_framework.permissions import AllowAny
-from django.db.models import Sum,Count
+from django.db.models import Sum, Count, Q
 from apps.payments.models import Payment
 from apps.orders.models import Order
 from django.utils import timezone
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
+
 
 class ClientViewSet(viewsets.ModelViewSet):
-    queryset = Client.objects.all()
+    queryset = Client.objects.all().select_related('user').order_by('-created_at')
     serializer_class = ClientSerializer
-    @action(detail=True, methods=['get'], permission_classes = [AllowAny])
+
+    @extend_schema(tags=['Clients'])
+    @action(detail=True, methods=['get'])
     def statistics(self, request, pk=None):
-        client = self.get_object()
-        total_spent = sum(o.total_price for o in client.orders.all()) or 0
-        initial = client.initial_followers or 0
-        current = client.current_followers or 0
-        growth = current - initial
+        client = Client.objects.filter(pk=pk).annotate(
+            total_orders=Count('orders', distinct=True),
+            total_spent=Sum('orders__total_price'),
+            active_tasks=Count('orders__tasks', filter=Q(orders__tasks__status='todo'), distinct=True),
+            pending_plans=Count('plans', filter=Q(plans__status='pending'), distinct=True),
+            approved_plans=Count('plans', filter=Q(plans__status='approved'), distinct=True),
+            published_plans=Count('plans',
+                                  filter=Q(plans__status='published').distinct() if hasattr(self, 'distinct') else Q(
+                                      plans__status='published'), distinct=True),
+        ).first()
+
+        if not client:
+            return Response({"detail": "Mijoz topilmadi"}, status=404)
+
+        growth = (client.current_followers or 0) - (client.initial_followers or 0)
         data = {
             'client_name': client.name,
-            'total_orders': client.orders.count(),
-            'total_spent': total_spent,
-            'active_tasks': Task.objects.filter(order__client=client, status='todo').count(),
+            'total_orders': client.total_orders,
+            'total_spent': client.total_spent or 0,
+            'active_tasks': client.active_tasks,
             'followers_growth': growth,
             'content_stats': {
-                'pending': client.plans.filter(status='pending').count(),
-                'approved': client.plans.filter(status='approved').count(),
-                'published': client.plans.filter(status='published').count(),
+                'pending': client.pending_plans,
+                'approved': client.approved_plans,
+                'published': client.published_plans,
             }
         }
         return Response(data)
 
 
 class AdminDashboardAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(tags=['Dashboard'])
     def get(self, request):
         today = timezone.now().date()
         daily_revenue = Payment.objects.filter(

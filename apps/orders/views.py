@@ -6,8 +6,9 @@ from django.db.models import Sum, Count
 from rest_framework import viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from drf_spectacular.utils import extend_schema
 
-
+@extend_schema(tags=['Orders'])
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all().select_related('client', 'service')
     serializer_class = OrderSerializer
@@ -21,12 +22,14 @@ class OrderViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
+@extend_schema(tags=['Dashboard'])
 class DashboardAnalyticsView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         total_orders = Order.objects.count()
-        total_revenue = Order.objects.aggregate(Sum('total_price'))['total_price__sum'] or 0
+        total_revenue = Order.objects.aggregate(total=Sum('total_price'))['total'] or 0
         orders_by_status = Order.objects.values('status').annotate(count=Count('id'))
-
         return Response({
             'total_orders': total_orders,
             'total_revenue': total_revenue,

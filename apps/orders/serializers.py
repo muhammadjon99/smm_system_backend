@@ -13,3 +13,9 @@ class OrderSerializer(serializers.ModelSerializer):
         if data.get('quantity') and data['quantity'] <= 0:
             raise serializers.ValidationError({"quantity": "Miqdor 0 dan katta bo'lishi shart."})
         return data
+
+    def create(self, validated_data):
+        service = validated_data.get('service')
+        quantity = validated_data.get('quantity', 1)
+        validated_data['total_price'] = service.price * quantity
+        return super().create(validated_data)
