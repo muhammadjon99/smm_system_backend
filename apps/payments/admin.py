@@ -10,4 +10,8 @@ class PaymentAdmin(admin.ModelAdmin):
 
     @admin.action(description="Tanlangan to'lovlarni tasdiqlash")
     def confirm_payments(self, request, queryset):
-        queryset.update(is_confirmed=True)
+        for payment in queryset:
+            if not payment.is_confirmed:
+                payment.is_confirmed = True
+                payment.save()
+        self.message_user(request, "Tanlangan to'lovlar tasdiqlandi va mijozlar balansi yangilandi.")

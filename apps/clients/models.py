@@ -8,9 +8,14 @@ class Client(models.Model):
     logo = models.ImageField(upload_to='client_logos/', blank=True, null=True)
     insta_username = models.CharField(max_length=100, blank=True, null=True)
     insta_password = models.CharField(max_length=255, blank=True, null=True)
+    video_limit = models.PositiveIntegerField(default=0)
+    post_limit = models.PositiveIntegerField(default=0)
+    story_limit = models.PositiveIntegerField(default=0)
+    reels_limit = models.PositiveIntegerField(default=0)
     initial_followers = models.PositiveIntegerField(default=0)
     current_followers = models.PositiveIntegerField(default=0)
     monthly_budget = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_paid = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

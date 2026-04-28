@@ -1,11 +1,20 @@
 from django.db import models
 
 class Service(models.Model):
+    SERVICE_TYPE_CHOICES = [
+        ('video', 'Video'),
+        ('post', 'Post'),
+        ('story', 'Story'),
+        ('reels', 'Reels'),
+    ]
     name = models.CharField(max_length=100)
+    service_type = models.CharField(
+        max_length=20,
+        choices=SERVICE_TYPE_CHOICES,
+        default='post'
+    )
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    video_limit = models.PositiveIntegerField(default=0)
-    post_limit = models.PositiveIntegerField(default=0)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.get_service_type_display()})"
