@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
+
 
 class Task(models.Model):
     class Priority(models.TextChoices):
@@ -23,6 +25,10 @@ class Task(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.TODO)
     deadline = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
+    @property
+    def is_overdue(self):
+        return self.status != self.Status.DONE and self.deadline < timezone.now()
 
     def __str__(self):
-        return self.title
+        status_tag = "[MUDDATI O'TGAN]" if self.is_overdue else ""
+        return f"{status_tag} {self.title}"

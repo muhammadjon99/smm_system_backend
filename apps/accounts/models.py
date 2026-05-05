@@ -23,7 +23,7 @@ class User(AbstractUser):
             ('manager', 'Manager'),
             ('client', 'Client'),
         ],
-        default='admin'
+        default='client'
     )
     def __str__(self):
         return f"{self.username} - {self.role} ({self.phone if self.phone else 'No phone'})"

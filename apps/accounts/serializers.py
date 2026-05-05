@@ -13,7 +13,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'password', 'first_name', 'last_name', 'phone', 'role']
+        read_only_fields = ['role']
     def create(self, validated_data):
+        validated_data['role'] = 'client'
         return User.objects.create_user(**validated_data)
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
@@ -23,3 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, min_length=8)
